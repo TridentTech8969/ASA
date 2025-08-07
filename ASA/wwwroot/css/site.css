@@ -21,7 +21,7 @@ body {
 
 /* Navigation Styles */
 .navbar {
-    background: rgba(26, 54, 93, 0.95) !important;
+    background: black !important;
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
     box-shadow: 0 2px 20px rgba(0,0,0,0.1);
@@ -84,7 +84,8 @@ body {
 /* Hero Section */
 .hero-section {
     height: 100vh;
-    background: linear-gradient(rgba(26, 54, 93, 0.7), rgba(45, 90, 135, 0.7)), url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+    background-image: url('../images/chatgpt image aug 6, 2025, 09_30_50 pm.png');
+    /* background: linear-gradient(rgba(26, 54, 93, 0.7), rgba(45, 90, 135, 0.7)), url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');*/
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
