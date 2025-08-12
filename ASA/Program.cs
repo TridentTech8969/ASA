@@ -2,6 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+//builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("SmtpOptions"));
 
 var app = builder.Build();
 

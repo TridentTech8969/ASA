@@ -217,17 +217,41 @@ function handleContactForm() {
         submitButton.disabled = true;
 
         // Simulate form submission (replace with actual form submission logic)
-        setTimeout(() => {
-            // Show success message
-            showNotification('Thank you! Your message has been sent successfully.', 'success');
+      
 
-            // Reset form
-            contactForm.reset();
+            var $form = $(this);
+            var token = $form.find('input[name="__RequestVerificationToken"]').val();
+            var submitBtn = $('#submitBtn');
+           // var originalText = submitBtn.html();
 
-            // Restore button
-            submitButton.innerHTML = originalText;
-            submitButton.disabled = false;
-        }, 2000);
+            // Build data (send whatever you need; here I’m sending email + message like your action)
+            var data = {
+                __RequestVerificationToken: token,
+                email: $('#Email').val().trim(),
+                message: $('#Message').val().trim()
+            };
+
+            submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Sending...').prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("SendMail", "Home")',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    if (response && response.success) {
+                        alert(response.message || 'Sent!');
+                        $form[0].reset();
+                    } else {
+                        alert((response && response.message) || 'Could not send email.');
+                    }
+                },
+                error: function () {
+                    alert('An error occurred while sending your message. Please try again.');
+                },
+                complete: function () {
+                   // submitBtn.html(originalText).prop('disabled', false);
+                }
+            });
     });
 }
 

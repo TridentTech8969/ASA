@@ -33,18 +33,20 @@
                     <div class="contact-form" data-aos="fade-right">
                         <h4 class="mb-4"><i class="fas fa-envelope me-2"></i>Send us a Message</h4>
 
-                        <form asp-action="Contact" method="post" id="contactForm">
+                        <form asp-controller="Home" asp-action="SendMail" method="post" id="contactForm">
+                            @Html.AntiForgeryToken()
+
                             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="FullName" class="form-label"></label>
-                                    <input asp-for="FullName" class="form-control" placeholder="Enter your full name">
+                                    <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
                                     <span asp-validation-for="FullName" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="PhoneNumber" class="form-label"></label>
-                                    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number">
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" />
                                     <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                                 </div>
                             </div>
@@ -52,12 +54,12 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="Email" class="form-label"></label>
-                                    <input asp-for="Email" class="form-control" placeholder="Enter your email address">
+                                    <input asp-for="Email" class="form-control" placeholder="Enter your email address" />
                                     <span asp-validation-for="Email" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="GSTNumber" class="form-label"></label>
-                                    <input asp-for="GSTNumber" class="form-control" placeholder="e.g., 22AAAAA0000A1Z5">
+                                    <input asp-for="GSTNumber" class="form-control" placeholder="e.g., 22AAAAA0000A1Z5" />
                                     <span asp-validation-for="GSTNumber" class="text-danger"></span>
                                     <small class="form-text text-muted">Optional - for business customers</small>
                                 </div>
@@ -65,7 +67,7 @@
 
                             <div class="mb-3">
                                 <label asp-for="Company" class="form-label"></label>
-                                <input asp-for="Company" class="form-control" placeholder="Enter your company name">
+                                <input asp-for="Company" class="form-control" placeholder="Enter your company name" />
                                 <span asp-validation-for="Company" class="text-danger"></span>
                             </div>
 
@@ -89,10 +91,11 @@
                                 <span asp-validation-for="Message" class="text-danger"></span>
                             </div>
 
-                            <button type="submit" class="btn btn-submit btn-primary">
+                            <button type="submit" id="submitBtn" class="btn btn-submit btn-primary">
                                 <i class="fas fa-paper-plane me-2"></i>Send Message
                             </button>
                         </form>
+
                     </div>
                 </div>
 
@@ -253,32 +256,3 @@
     </section>
 </div>
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
-    <script>
-        // Form validation and enhancement
-        document.getElementById('contactForm').addEventListener('submit', function (e) {
-            const submitButton = this.querySelector('button[type="submit"]');
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
-            submitButton.disabled = true;
-        });
-
-        // GST Number formatting
-        document.getElementById('GSTNumber').addEventListener('input', function (e) {
-            let value = e.target.value.toUpperCase();
-            e.target.value = value;
-        });
-
-        // Phone number formatting
-        document.getElementById('PhoneNumber').addEventListener('input', function (e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 10) {
-                value = value.substring(0, 10);
-            }
-            e.target.value = value;
-        });
-    </script>
-}

@@ -19,18 +19,30 @@ body {
     color: var(--text-dark);
 }
 
-/* Navigation Styles */
+/* Navbar Fix - Transparent navbar that becomes dark on scroll */
 .navbar {
-    background: black !important;
-    backdrop-filter: blur(10px);
+    background: transparent !important;
+    background-color: transparent !important;
+    position: fixed !important;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    padding: 20px 0 !important;
+    backdrop-filter: none;
 }
+
+    /* Add background on scroll */
+    .navbar.scrolled {
+        background: rgba(0, 0, 0, 0.9) !important;
+        backdrop-filter: blur(10px);
+        padding: 15px 0 !important;
+    }
 
 .navbar-brand {
     font-weight: bold;
     font-size: 1.5rem;
-    color: white !important;
+    color: #fff !important;
     transition: all 0.3s ease;
 }
 
@@ -39,7 +51,7 @@ body {
     }
 
 .navbar-nav .nav-link {
-    color: rgba(255,255,255,0.9) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
     font-weight: 500;
     margin: 0 10px;
     transition: all 0.3s ease;
@@ -49,23 +61,112 @@ body {
 }
 
     .navbar-nav .nav-link:hover {
-        color: var(--accent-color) !important;
+        color: white !important;
         transform: translateY(-2px);
-        background: rgba(255, 255, 255, 0.1);
+        background: linear-gradient(44deg, rgba(13, 110, 253, 0.25), #e20c24) !important;
     }
 
     .navbar-nav .nav-link.offer-highlight {
-        background: linear-gradient(45deg, var(--accent-color), #ff8c35) !important;
-        color: white !important;
+        background: linear-gradient(44deg, rgba(13, 110, 253, 0.25), #e20c24) !important;
+        color: black !important;
         animation: pulse 2s infinite;
         box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
     }
 
         .navbar-nav .nav-link.offer-highlight:hover {
-            background: linear-gradient(45deg, #e55a2b, #ff8c35) !important;
+            background: linear-gradient(44deg, rgba(13, 110, 253, 0.25), #e20c24) !important;
+            color:white !important;
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
         }
+
+/* Override Bootstrap navbar-dark class */
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+    .navbar-dark .navbar-nav .nav-link:hover {
+        color: white !important;
+    }
+
+.navbar-dark .navbar-brand {
+    color: #fff !important;
+}
+
+    .navbar-dark .navbar-brand:hover {
+        color: var(--accent-color) !important;
+    }
+
+/* Navbar toggler for mobile */
+.navbar-toggler {
+    border: none !important;
+    padding: 4px 8px;
+}
+
+    .navbar-toggler:focus {
+        box-shadow: none !important;
+    }
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Hero Section */
+.hero-section {
+    height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('../images/chatgpt image aug 6, 2025, 09_30_50 pm.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding-top: 80px; /* Account for fixed navbar */
+}
+
+.hero-content {
+    text-align: center;
+    color: white;
+    z-index: 2;
+    position: relative;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.btn-hero {
+    background: #dc3545;
+    color: white;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+}
+
+    .btn-hero:hover {
+        background: #bb2d3b;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
+        text-decoration: none;
+    }
 
 @keyframes pulse {
     0% {
@@ -81,65 +182,12 @@ body {
     }
 }
 
-/* Hero Section */
-.hero-section {
-    height: 100vh;
-    background-image: url('../images/chatgpt image aug 6, 2025, 09_30_50 pm.png');
-    /* background: linear-gradient(rgba(26, 54, 93, 0.7), rgba(45, 90, 135, 0.7)), url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');*/
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-content {
-    text-align: center;
-    color: white;
-    z-index: 2;
-}
-
-.hero-title {
-    font-size: 3.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-.hero-subtitle {
-    font-size: 1.3rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
-}
-
-.btn-hero {
-    background: var(--accent-color);
-    border: none;
-    padding: 15px 40px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border-radius: 50px;
-    transition: all 0.3s ease;
-    color: white;
-    text-decoration: none;
-    display: inline-block;
-}
-
-    .btn-hero:hover {
-        background: #e55a2b;
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
-        color: white;
-        text-decoration: none;
-    }
-
-/* Section Styles */
+/* Section Padding */
 .section-padding {
     padding: 80px 0;
 }
 
+/* Section Title */
 .section-title {
     font-size: 2.5rem;
     font-weight: 700;
@@ -416,7 +464,7 @@ body {
 
 /* Footer Styles */
 .footer {
-    background: var(--primary-color);
+    background: black;
     color: white;
     padding: 50px 0 20px;
 }
@@ -498,7 +546,7 @@ body {
     }
 
     .hero-subtitle {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 
     .section-title {
