@@ -1,40 +1,37 @@
 ﻿@{
-    ViewData["Title"] = "Inbox";
+    ViewData["Title"] = "Customer Emails";
 }
-<link href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" rel="stylesheet" />
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" rel="stylesheet" />
 
 <div class="container py-4">
     <div class="d-flex align-items-center mb-3">
-        <h2 class="me-3">Customer Emails</h2>
+        <h2 class="me-3">Customer Contact Forms</h2>
         <span class="badge bg-info" id="badgeNew" style="display:none">New</span>
     </div>
 
-
     <div class="mb-3">
-        <input id="searchBox" class="form-control" placeholder="Search sender, subject, labels..." />
+        <input id="searchBox" class="form-control" placeholder="Search name, email, company, phone..." />
     </div>
-
 
     <table id="emailsTable" class="display" style="width:100%">
         <thead>
             <tr>
-                <th>From</th>
-                <th>Subject</th>
+                <th>Contact Details</th>
+                <th>Company & GST</th>
+                <th>Phone</th>
                 <th>Received</th>
-                <th>Unread</th>
-                <th>Labels</th>
-                <th>Attachments</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
     </table>
 
-
     <!-- Detail offcanvas -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="detailPane" aria-labelledby="detailPaneLabel" style="width: 600px;">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="detailPane" aria-labelledby="detailPaneLabel" style="width: 700px;">
         <div class="offcanvas-header">
-            <h5 id="detailPaneLabel">Email</h5>
+            <h5 id="detailPaneLabel">Contact Form Details</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
@@ -43,9 +40,295 @@
     </div>
 </div>
 
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-<script src="/js/emails.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.14/signalr.min.js"></script>
+
+<script>
+    (function () {
+        let table;
+
+        // SignalR connection for live updates
+        const connection = new signalR.HubConnectionBuilder().withUrl("/hubs/email").build();
+
+        connection.on("NewEmails", function (newEmails) {
+            const badge = document.getElementById('badgeNew');
+            badge.style.display = 'inline-block';
+            setTimeout(() => { badge.style.display = 'none'; }, 3000);
+
+            if (table) {
+                table.ajax.reload(null, false);
+            }
+        });
+
+        connection.start().catch(function (err) {
+            console.error('SignalR connection error:', err);
+        });
+
+        $(document).ready(function () {
+            // First, let's test the API response
+            fetch('/api/emails')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('=== API RESPONSE DEBUG ===');
+                    console.log('Full response:', data);
+                    if (data.data && data.data.length > 0) {
+                        console.log('First email object:', data.data[0]);
+                        console.log('Properties:', Object.keys(data.data[0]));
+                    }
+                    console.log('=== END DEBUG ===');
+                })
+                .catch(err => console.error('API test failed:', err));
+
+            table = $('#emailsTable').DataTable({
+                ajax: {
+                    url: '/api/emails',
+                    dataSrc: function (json) {
+                        console.log('DataTables received:', json);
+                        return json.data || json;
+                    },
+                    error: function (xhr, error, code) {
+                        console.error('DataTables Ajax error:', error, code);
+                        console.error('Response:', xhr.responseText);
+                    }
+                },
+                deferRender: true,
+                pageLength: 25,
+                order: [[3, 'desc']], // Sort by received date desc
+                columns: [
+                    {
+                        data: null,
+                        title: 'Contact Details',
+                        render: function (row) {
+                            console.log('Rendering Contact Details for row:', row);
+                            const name = getProperty(row, ['fromName', 'FromName']) || 'Unknown';
+                            const email = getProperty(row, ['fromEmail', 'FromEmail']) || '';
+                            const isContactForm = getProperty(row, ['isContactForm', 'IsContactForm']) || false;
+
+                            return `<div>
+                                <strong>${escapeHtml(name)}</strong>
+                                ${isContactForm ? '<span class="badge bg-primary ms-1">Contact Form</span>' : ''}
+                                <div class='text-muted small'>
+                                    <i class="fas fa-envelope"></i> ${escapeHtml(email)}
+                                </div>
+                            </div>`;
+                        }
+                    },
+                    {
+                        data: null,
+                        title: 'Company & GST',
+                        render: function (row) {
+                            const company = getProperty(row, ['company', 'Company']) || '-';
+                            const gst = getProperty(row, ['gst', 'GST']) || '';
+
+                            return `<div>
+                                <div><strong>${escapeHtml(company)}</strong></div>
+                                ${gst ? `<div class='text-muted small'>GST: ${escapeHtml(gst)}</div>` : ''}
+                            </div>`;
+                        }
+                    },
+                    {
+                        data: null,
+                        title: 'Phone',
+                        render: function (row) {
+                            const phone = getProperty(row, ['phone', 'Phone']) || '-';
+                            return phone !== '-' ?
+                                `<a href="tel:${escapeHtml(phone)}" class="text-decoration-none">${escapeHtml(phone)}</a>` :
+                                '-';
+                        }
+                    },
+                    {
+                        data: null,
+                        title: 'Received',
+                        render: function (row) {
+                            const received = getProperty(row, [
+                                'receivedLocal', 'ReceivedLocal',
+                                'received', 'Received',
+                                'receivedUtc', 'ReceivedUtc'
+                            ]) || 'Unknown';
+                            return `<small>${escapeHtml(received)}</small>`;
+                        }
+                    },
+                    {
+                        data: null,
+                        title: 'Status',
+                        render: function (row) {
+                            const unread = getProperty(row, ['unread', 'Unread']) || false;
+                            const hasAttachments = getProperty(row, ['hasAttachments', 'HasAttachments']) || false;
+
+                            let badges = '';
+                            if (unread) {
+                                badges += '<span class="badge bg-warning text-dark me-1">New</span>';
+                            }
+                            if (hasAttachments) {
+                                badges += '<span class="badge bg-info text-dark me-1">📎</span>';
+                            }
+
+                            return badges || '<span class="text-muted">Read</span>';
+                        }
+                    },
+                    {
+                        data: null,
+                        title: 'Actions',
+                        orderable: false,
+                        render: function (row) {
+                            const id = getProperty(row, ['id', 'Id']) || '';
+                            const email = getProperty(row, ['fromEmail', 'FromEmail']) || '';
+                            const phone = getProperty(row, ['phone', 'Phone']) || '';
+
+                            let actions = `<button class='btn btn-sm btn-primary me-1' onclick='openDetail("${id}")'>View</button>`;
+
+                            if (email && email !== 'contact@website') {
+                                actions += `<a href="mailto:${email}" class="btn btn-sm btn-outline-secondary me-1" title="Send Email">✉️</a>`;
+                            }
+
+                            if (phone && phone !== '-') {
+                                actions += `<a href="tel:${phone}" class="btn btn-sm btn-outline-secondary" title="Call">📞</a>`;
+                            }
+
+                            return actions;
+                        }
+                    }
+                ]
+            });
+
+            // Search functionality
+            $('#searchBox').on('input', function () {
+                table.search(this.value).draw();
+            });
+        });
+
+        // Helper function to get property with multiple possible names
+        function getProperty(obj, possibleNames) {
+            for (let name of possibleNames) {
+                if (obj && obj.hasOwnProperty(name)) {
+                    return obj[name];
+                }
+            }
+            return null;
+        }
+
+        // Global function to open email detail
+        window.openDetail = function (id) {
+            console.log('Opening detail for email ID:', id);
+
+            fetch(`/api/emails/${encodeURIComponent(id)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(emailData => {
+                    console.log('Email detail received:', emailData);
+                    showDetail(emailData);
+                })
+                .catch(error => {
+                    console.error('Error fetching email detail:', error);
+                    alert('Error loading email details: ' + error.message);
+                });
+        };
+
+        function showDetail(emailData) {
+            const detailElement = document.getElementById('emailDetail');
+
+            const contactDetails = getProperty(emailData, ['contactDetails', 'ContactDetails']);
+            const name = getProperty(emailData, ['fromName', 'FromName']) || 'Unknown';
+            const email = getProperty(emailData, ['fromEmail', 'FromEmail']) || '';
+            const phone = getProperty(emailData, ['phone', 'Phone']) || '-';
+            const company = getProperty(emailData, ['company', 'Company']) || '-';
+            const gst = getProperty(emailData, ['gst', 'GST']) || '-';
+            const message = getProperty(emailData, ['message', 'Message']) ||
+                getProperty(contactDetails, ['message', 'Message']) || '';
+
+            const attachments = (getProperty(emailData, ['attachments', 'Attachments']) || []).map(attachment =>
+                `<li><a href='/api/emails/${encodeURIComponent(getProperty(emailData, ['id', 'Id']))}/attachment?fileName=${encodeURIComponent(getProperty(attachment, ['fileName', 'FileName']))}'>
+                    ${escapeHtml(getProperty(attachment, ['fileName', 'FileName']))}${getProperty(attachment, ['sizeBytes', 'SizeBytes']) ? ` (${formatSize(getProperty(attachment, ['sizeBytes', 'SizeBytes']))})` : ''}
+                </a></li>`
+            ).join('');
+
+            detailElement.innerHTML = `
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">📧 Contact Form Submission</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Contact Information</h6>
+                                <table class="table table-sm">
+                                    <tr><td><strong>Name:</strong></td><td>${escapeHtml(name)}</td></tr>
+                                    <tr><td><strong>Email:</strong></td><td><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td></tr>
+                                    <tr><td><strong>Phone:</strong></td><td>${phone !== '-' ? `<a href="tel:${escapeHtml(phone)}">${escapeHtml(phone)}</a>` : '-'}</td></tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Business Information</h6>
+                                <table class="table table-sm">
+                                    <tr><td><strong>Company:</strong></td><td>${escapeHtml(company)}</td></tr>
+                                    <tr><td><strong>GST Number:</strong></td><td>${escapeHtml(gst)}</td></tr>
+                                    <tr><td><strong>Received:</strong></td><td>${escapeHtml(getProperty(emailData, ['receivedLocal', 'ReceivedLocal']))}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        ${message ? `
+                        <div class="mt-3">
+                            <h6 class="text-primary">Message</h6>
+                            <div class="border p-3 bg-light rounded">
+                                <p class="mb-0">${escapeHtml(message)}</p>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        ${attachments ? `
+                        <div class="mt-3">
+                            <h6 class="text-primary">Attachments</h6>
+                            <ul class="list-unstyled">${attachments}</ul>
+                        </div>
+                        ` : ''}
+
+                        <div class="mt-3">
+                            <h6 class="text-primary">Quick Actions</h6>
+                            <a href="mailto:${escapeHtml(email)}" class="btn btn-primary me-2">
+                                <i class="fas fa-envelope"></i> Send Email
+                            </a>
+                            ${phone !== '-' ? `<a href="tel:${escapeHtml(phone)}" class="btn btn-success">
+                                <i class="fas fa-phone"></i> Call Now
+                            </a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const offcanvas = new bootstrap.Offcanvas('#detailPane');
+            offcanvas.show();
+        }
+
+        // Utility functions
+        function truncate(str, maxLength) {
+            return (str || '').length > maxLength ? (str.substring(0, maxLength - 1) + '…') : (str || '');
+        }
+
+        function escapeHtml(unsafe) {
+            return (unsafe || '').replace(/[&<>"']/g, function (match) {
+                const escapeMap = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return escapeMap[match];
+            });
+        }
+
+        function formatSize(bytes) {
+            if (!bytes) return '';
+            const kb = bytes / 1024;
+            if (kb < 1024) return kb.toFixed(1) + " KB";
+            return (kb / 1024).toFixed(1) + " MB";
+        }
+    })();
+</script>

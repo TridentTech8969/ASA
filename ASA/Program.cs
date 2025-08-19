@@ -1,42 +1,47 @@
 using IndustrialSolutions.Email;
-using IndustrialSolutions.Hubs;
 using IndustrialSolutions.Services;
+using IndustrialSolutions.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-//builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("SmtpOptions"));
+// Configure Email IMAP Options
 builder.Services.Configure<EmailImapOptions>(o =>
 {
-    o.Username = "youremail@gmail.com"; // TODO: set yours
-    o.AppPassword = "xxxxxxxxxxxxxxxx"; // TODO: set yours
-    o.FilterLabel = "Contact Form"; // or null to include all INBOX
+    o.Username = "eternalvision2025@gmail.com";
+    o.AppPassword = "gvvy enkz fjjo iccp";
+    o.FilterLabel = null; // Start with null
 });
+
+builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+
+// ADD THESE LINES - they're probably missing!
 builder.Services.AddSingleton<EmailCache>();
 builder.Services.AddSingleton<ImapEmailReader>();
-builder.Services.AddHostedService<EmailSyncService>();
+builder.Services.AddHostedService<EmailSyncService>(); // This one is critical!
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-app.MapHub<EmailHub>("/hubs/email");
-app.UseAuthorization();
+// app.UseAuthentication(); // Uncomment when you add authentication
+// app.UseAuthorization();   // Uncomment when you add authentication
 
+// Map SignalR hub
+app.MapHub<EmailHub>("/hubs/email");
+
+// Map routes
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Emails}/{action=Index}/{id?}");
 
 app.Run();

@@ -1,12 +1,10 @@
-﻿using IndustrialSolutions.Models;
+﻿using IndustrialSolutions.Email;
+using IndustrialSolutions.Hubs;
+using IndustrialSolutions.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
-using IndustrialSolutions.Email;
-using IndustrialSolutions.Hubs;
 
-
-namespace IndustrialSolutions.Services
-{
+namespace IndustrialSolutions.Services;
 
 public class EmailSyncService : BackgroundService
 {
@@ -14,11 +12,17 @@ public class EmailSyncService : BackgroundService
     private readonly EmailCache _cache;
     private readonly IHubContext<EmailHub> _hub;
     private readonly EmailImapOptions _opt;
+    private readonly ILogger<EmailSyncService> _logger;
 
-
-    public EmailSyncService(ImapEmailReader reader, EmailCache cache, IHubContext<EmailHub> hub, IOptions<EmailImapOptions> opt)
-    { _reader = reader; _cache = cache; _hub = hub; _opt = opt.Value; }
-
+    public EmailSyncService(ImapEmailReader reader, EmailCache cache,
+        IHubContext<EmailHub> hub, IOptions<EmailImapOptions> opt, ILogger<EmailSyncService> logger)
+    {
+        _reader = reader;
+        _cache = cache;
+        _hub = hub;
+        _opt = opt.Value;
+        _logger = logger;
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -28,7 +32,6 @@ public class EmailSyncService : BackgroundService
             {
                 var list = await _reader.FetchInboxAsync(stoppingToken);
                 var newlyAdded = new List<EmailListItemDto>();
-
 
                 foreach (var d in list)
                 {
@@ -46,30 +49,36 @@ public class EmailSyncService : BackgroundService
                         ReceivedLocal = d.ReceivedLocal,
                         Unread = d.Unread,
                         HasAttachments = d.HasAttachments,
-                        Labels = d.Labels
+                        Labels = d.Labels,
+                        Attachments = d.Attachments
                     });
-                    if (!existed) newlyAdded.Add(new EmailListItemDto
+
+                    if (!existed)
                     {
-                        Id = d.Id,
-                        FromName = d.FromName,
-                        FromEmail = d.FromEmail,
-                        Subject = d.Subject,
-                        ReceivedLocal = d.ReceivedLocal
-                    });
+                        newlyAdded.Add(new EmailListItemDto
+                        {
+                            Id = d.Id,
+                            FromName = d.FromName,
+                            FromEmail = d.FromEmail,
+                            Subject = d.Subject,
+                            ReceivedLocal = d.ReceivedLocal
+                        });
+                    }
                 }
 
-
                 if (newlyAdded.Count > 0)
-                    await _hub.Clients.All.SendAsync("NewEmails", newlyAdded, cancellationToken: stoppingToken);
+                {
+                    await _hub.Clients.All.SendAsync("NewEmails", newlyAdded,
+                        cancellationToken: stoppingToken);
+                    _logger.LogInformation($"Found {newlyAdded.Count} new emails");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                // TODO: log
+                _logger.LogError(ex, "Error during email sync");
             }
-
 
             await Task.Delay(TimeSpan.FromSeconds(_opt.SyncIntervalSeconds), stoppingToken);
         }
     }
-}
 }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace IndustrialSolutions.Hubs
+namespace IndustrialSolutions.Hubs;
+
+public class EmailHub : Hub
 {
-    public class EmailHub : Hub
-    {
-    }
+    // Empty hub - SignalR handles the connection logic
 }

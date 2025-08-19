@@ -1,16 +1,13 @@
-﻿using System.Collections.Concurrent;
-using IndustrialSolutions.Models;
+﻿using IndustrialSolutions.Models;
+using System.Collections.Concurrent;
 
+namespace IndustrialSolutions.Services;
 
-namespace IndustrialSolutions.Services
-
+public class EmailCache
 {
-    public class EmailCache
-    {
-        private readonly ConcurrentDictionary<string, EmailDetailDto> _store = new();
+    private readonly ConcurrentDictionary<string, EmailDetailDto> _store = new();
 
-
-        public IReadOnlyCollection<EmailListItemDto> List() => _store.Values
+    public IReadOnlyCollection<EmailListItemDto> List() => _store.Values
         .OrderByDescending(e => e.ReceivedUtc)
         .Select(e => new EmailListItemDto
         {
@@ -29,13 +26,9 @@ namespace IndustrialSolutions.Services
         })
         .ToList();
 
+    public EmailDetailDto? Get(string id) => _store.TryGetValue(id, out var v) ? v : null;
 
-        public EmailDetailDto? Get(string id) => _store.TryGetValue(id, out var v) ? v : null;
+    public void Upsert(EmailDetailDto item) => _store[item.Id] = item;
 
-
-        public void Upsert(EmailDetailDto item) => _store[item.Id] = item;
-
-
-        public bool Contains(string id) => _store.ContainsKey(id);
-    }
+    public bool Contains(string id) => _store.ContainsKey(id);
 }
