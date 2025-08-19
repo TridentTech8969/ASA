@@ -8,138 +8,213 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    
+
     <style>
-        /* Products Dropdown Styles */
-        .nav-item.dropdown {
+        /* Professional Products Dropdown Styles */
+        .products-dropdown-wrapper {
             position: relative;
         }
-        
+
+        .products-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .products-dropdown-toggle:hover {
+                color: #ffd700 !important;
+            }
+
+        .dropdown-icon {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .products-dropdown-wrapper.show .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
         .products-dropdown {
             position: absolute;
             top: 100%;
-            left: 10%;
-            transform: translateX(-50%) translateY(-10px);
-            width: 700px;
-            max-width: 90vw;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            left: 0;
+            min-width: 320px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            padding: 0;
+            margin-top: 15px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .products-dropdown-wrapper.show .products-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-header {
+            padding: 20px 20px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+
+            .dropdown-header h6 {
+                margin: 0;
+                font-weight: 600;
+                font-size: 1.1rem;
+            }
+
+            .dropdown-header p {
+                margin: 5px 0 0;
+                font-size: 0.85rem;
+                opacity: 0.9;
+            }
+
+        .dropdown-items {
+            padding: 15px 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .dropdown-item-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: #334155;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+            .dropdown-item-link:hover {
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                color: #1e293b;
+                text-decoration: none;
+                border-color: #cbd5e1;
+                transform: translateX(5px);
+            }
+
+        .dropdown-item-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item-link:hover .dropdown-item-image {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .dropdown-item-content h6 {
+            margin: 0 0 3px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .dropdown-item-content p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #64748b;
+            line-height: 1.3;
+        }
+
+        /* Overlay for mobile */
+        .dropdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
-            z-index: 1000;
-            padding: 30px;
-            margin-top: 10px;
+            z-index: 999;
         }
-        
-        .nav-item.dropdown:hover .products-dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-        }
-        
-        .dropdown-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: inherit;
-            height: 100%;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .dropdown-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            text-decoration: none;
-            color: inherit;
-        }
-        
-        .dropdown-card-img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-        
-        .dropdown-card-body {
-            padding: 15px;
-        }
-        
-        .dropdown-card-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #1a365d;
-            margin-bottom: 8px;
-        }
-        
-        .dropdown-card-text {
-            font-size: 0.8rem;
-            color: #718096;
-            line-height: 1.4;
-            margin: 0;
-        }
-        
-        .dropdown-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        .dropdown-header h5 {
-            color: #1a365d;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .dropdown-header p {
-            color: #718096;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-        
-        /* Mobile responsiveness for dropdown */
-        @@media (max-width: 768px) {
+
+            .dropdown-overlay.show {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        /* Mobile Responsive */
+        @@media (max-width: 991px) {
             .products-dropdown {
-                width: 350px;
-                padding: 20px;
+                position: fixed;
+                top: 50%;
                 left: 50%;
-                transform: translateX(-50%) translateY(-10px);
+                transform: translate(-50%, -50%) scale(0.9);
+                min-width: 90vw;
+                max-width: 400px;
+                max-height: 70vh;
+                margin-top: 0;
             }
-            
-            .nav-item.dropdown:hover .products-dropdown {
-                transform: translateX(-50%) translateY(0);
+
+            .products-dropdown-wrapper.show .products-dropdown {
+                transform: translate(-50%, -50%) scale(1);
             }
-            
-            .dropdown-card-img {
-                height: 80px;
+
+            .dropdown-items {
+                max-height: calc(70vh - 100px);
             }
-            
-            .dropdown-card-body {
-                padding: 10px;
+        }
+
+        @@media (max-width: 576px) {
+            .dropdown-item-image {
+                width: 35px;
+                height: 35px;
+                margin-right: 12px;
             }
-            
-            .dropdown-card-title {
-                font-size: 0.85rem;
+
+            .dropdown-item-content h6 {
+                font-size: 0.9rem;
             }
-            
-            .dropdown-card-text {
+
+            .dropdown-item-content p {
                 font-size: 0.75rem;
             }
-        }
-        
-        @@media (max-width: 576px) {
-            .products-dropdown {
-                width: 280px;
-                left: 50%;
-                transform: translateX(-50%) translateY(-10px);
-            }
-            
-            .nav-item.dropdown:hover .products-dropdown {
-                transform: translateX(-50%) translateY(0);
+
+            .dropdown-item-link {
+                padding: 10px 12px;
             }
         }
+
+        /* Custom scrollbar for dropdown */
+        .dropdown-items::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-items::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .dropdown-items::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+            .dropdown-items::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
     </style>
 </head>
 <body>
@@ -147,7 +222,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                <img src="~/images/as_logo.png" style="height:90px;width:90px;" /> Aniket Sales Agencies
+                <img src="~/images/as_logo.png" style="height:60px;width:60px;" /></i> Aniket Sales Agencies
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -160,50 +235,64 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-area="" asp-controller="Home" asp-action="About">About Us</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Products">Products</a>
+                    <li class="nav-item products-dropdown-wrapper">
+                        <a class="nav-link products-dropdown-toggle" href="#" onclick="toggleProductsDropdown(event)">
+                            Products
+                            <i class="fas fa-chevron-down dropdown-icon"></i>
+                        </a>
                         <div class="products-dropdown">
                             <div class="dropdown-header">
-                                <h5>Our Product Categories</h5>
-                                <p>Professional-grade industrial tools and equipment</p>
+                                <h6>Our Product Categories</h6>
+                                <p>Professional-grade industrial tools</p>
                             </div>
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <a asp-area="" asp-controller="Product" asp-action="Pneumatic" class="dropdown-card">
-                                        <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Pneumatic Tools" class="dropdown-card-img">
-                                        <div class="dropdown-card-body">
-                                            <h6 class="dropdown-card-title">Pneumatic Tools</h6>
-                                            <p class="dropdown-card-text">High-performance pneumatic tools including air compressors and impact wrenches.</p>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="col-6">
-                                    <a asp-area="" asp-controller="Product" asp-action="PowerTools" class="dropdown-card">
-                                        <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Power Tools" class="dropdown-card-img">
-                                        <div class="dropdown-card-body">
-                                            <h6 class="dropdown-card-title">Power Tools</h6>
-                                            <p class="dropdown-card-text">Electric and battery-powered tools designed for heavy-duty industrial use.</p>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="col-6">
-                                    <a asp-area="" asp-controller="Product" asp-action="CuttingTools" class="dropdown-card">
-                                        <img src="https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Cutting Tools" class="dropdown-card-img">
-                                        <div class="dropdown-card-body">
-                                            <h6 class="dropdown-card-title">Cutting Tools</h6>
-                                            <p class="dropdown-card-text">Precision cutting tools and blades for metal, wood, and composite materials.</p>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="col-6">
-                                    <a asp-area="" asp-controller="Product" asp-action="Abrasives" class="dropdown-card">
-                                        <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Abrasives" class="dropdown-card-img">
-                                        <div class="dropdown-card-body">
-                                            <h6 class="dropdown-card-title">Abrasives</h6>
-                                            <p class="dropdown-card-text">Industrial-grade abrasive products including grinding wheels and polishing compounds.</p>
-                                        </div>
-                                    </a>
-                                </div>
+                            <div class="dropdown-items">
+                                <a asp-area="" asp-controller="Product" asp-action="Pneumatic" class="dropdown-item-link">
+                                    <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Pneumatic Tools" class="dropdown-item-image">
+                                    <div class="dropdown-item-content">
+                                        <h6>Pneumatic Tools</h6>
+                                        <p>High-performance air compressors and impact tools</p>
+                                    </div>
+                                </a>
+
+                                <a asp-area="" asp-controller="Product" asp-action="PowerTools" class="dropdown-item-link">
+                                    <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Power Tools" class="dropdown-item-image">
+                                    <div class="dropdown-item-content">
+                                        <h6>Power Tools</h6>
+                                        <p>Electric and battery-powered industrial tools</p>
+                                    </div>
+                                </a>
+
+                                <a asp-area="" asp-controller="Product" asp-action="CuttingTools" class="dropdown-item-link">
+                                    <img src="https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Cutting Tools" class="dropdown-item-image">
+                                    <div class="dropdown-item-content">
+                                        <h6>Cutting Tools</h6>
+                                        <p>Precision blades for metal, wood & composites</p>
+                                    </div>
+                                </a>
+
+                                <a asp-area="" asp-controller="Product" asp-action="Abrasives" class="dropdown-item-link">
+                                    <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Abrasives" class="dropdown-item-image">
+                                    <div class="dropdown-item-content">
+                                        <h6>Abrasives</h6>
+                                        <p>Grinding wheels and polishing compounds</p>
+                                    </div>
+                                </a>
+
+                                <a asp-area="" asp-controller="Product" asp-action="MeasuringTools" class="dropdown-item-link">
+                                    <img src="https://images.unsplash.com/photo-1581092795227-d6b5ba84fd06?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Measuring Tools" class="dropdown-item-image">
+                                    <div class="dropdown-item-content">
+                                        <h6>Measuring Tools</h6>
+                                        <p>Precision measurement and calibration tools</p>
+                                    </div>
+                                </a>
+
+                                <a asp-area="" asp-controller="Product" asp-action="SafetyEquipment" class="dropdown-item-link">
+                                    <img src="https://images.unsplash.com/photo-1581092582976-41df5deb80b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Safety Equipment" class="dropdown-item-image">
+                                    <div class="dropdown-item-content">
+                                        <h6>Safety Equipment</h6>
+                                        <p>Industrial safety gear and protective equipment</p>
+                                    </div>
+                                </a>
                             </div>
                         </div>
                     </li>
@@ -219,6 +308,9 @@
             </div>
         </div>
     </nav>
+
+    <!-- Dropdown Overlay for Mobile -->
+    <div class="dropdown-overlay" onclick="closeProductsDropdown()"></div>
 
     <!-- Main Content -->
     <main role="main">
@@ -295,7 +387,67 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
+        // Products Dropdown Functionality
+        function toggleProductsDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const wrapper = document.querySelector('.products-dropdown-wrapper');
+            const overlay = document.querySelector('.dropdown-overlay');
+
+            if (wrapper.classList.contains('show')) {
+                closeProductsDropdown();
+            } else {
+                // Close any other open dropdowns first
+                closeAllDropdowns();
+
+                wrapper.classList.add('show');
+                overlay.classList.add('show');
+
+                // Prevent body scroll on mobile
+                if (window.innerWidth <= 991) {
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+        }
+
+        function closeProductsDropdown() {
+            const wrapper = document.querySelector('.products-dropdown-wrapper');
+            const overlay = document.querySelector('.dropdown-overlay');
+
+            wrapper.classList.remove('show');
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.products-dropdown-wrapper').forEach(wrapper => {
+                wrapper.classList.remove('show');
+            });
+            document.querySelector('.dropdown-overlay').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const wrapper = document.querySelector('.products-dropdown-wrapper');
+            const dropdown = document.querySelector('.products-dropdown');
+            const toggle = document.querySelector('.products-dropdown-toggle');
+
+            if (!wrapper.contains(event.target)) {
+                closeProductsDropdown();
+            }
+        });
+
+        // Close dropdown on escape key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeProductsDropdown();
+            }
+        });
+
         // Navbar scroll effect and AOS initialization
         document.addEventListener('DOMContentLoaded', function () {
             const navbar = document.querySelector('.navbar');
@@ -315,6 +467,13 @@
                     once: true
                 });
             }
+
+            // Close dropdown on window resize
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 991) {
+                    closeProductsDropdown();
+                }
+            });
         });
     </script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Inbox";
+}
+<link href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" rel="stylesheet" />
+
+
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="me-3">Customer Emails</h2>
+        <span class="badge bg-info" id="badgeNew" style="display:none">New</span>
+    </div>
+
+
+    <div class="mb-3">
+        <input id="searchBox" class="form-control" placeholder="Search sender, subject, labels..." />
+    </div>
+
+
+    <table id="emailsTable" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>Subject</th>
+                <th>Received</th>
+                <th>Unread</th>
+                <th>Labels</th>
+                <th>Attachments</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+    </table>
+
+
+    <!-- Detail offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="detailPane" aria-labelledby="detailPaneLabel" style="width: 600px;">
+        <div class="offcanvas-header">
+            <h5 id="detailPaneLabel">Email</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div id="emailDetail"></div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+<script src="/js/emails.js"></script>
