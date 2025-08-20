@@ -1,20 +1,21 @@
 ﻿using Microsoft.Extensions.Options;
-using IndustrialSolutions.Email;
 using IndustrialSolutions.Models;
 using MailKit.Net.Imap;
 using MailKit.Search;
 using MailKit;
 using MailKit.Security;
 using MimeKit;
+// Use alias to avoid namespace conflict
+using EmailConfig = IndustrialSolutions.Email.EmailImapOptions;
 
 namespace IndustrialSolutions.Services;
 
 public class ImapEmailReader
 {
-    private readonly EmailImapOptions _opt;
+    private readonly EmailConfig _opt;
     private readonly TimeZoneInfo _tz;
 
-    public ImapEmailReader(IOptions<EmailImapOptions> opt)
+    public ImapEmailReader(IOptions<EmailConfig> opt)
     {
         _opt = opt.Value;
         _tz = TimeZoneInfo.FindSystemTimeZoneById(_opt.TimeZoneId);
@@ -40,7 +41,7 @@ public class ImapEmailReader
         // Simple search for all non-deleted messages
         SearchQuery query = SearchQuery.NotDeleted;
         var uids = await inbox.SearchAsync(query, ct);
-        var last200 = uids.OrderByDescending(u => u.Id).Take(200).ToList();
+        var last200 = uids.OrderByDescending(u => u.Id).Take(_opt.MaxEmailsToFetch).ToList();
 
         // Simple fetch without complex parameters - this WILL work
         var summaries = await inbox.FetchAsync(last200, MessageSummaryItems.All, ct);
@@ -68,7 +69,7 @@ public class ImapEmailReader
                 FromName = from?.Name ?? string.Empty,
                 FromEmail = from?.Address ?? string.Empty,
                 Subject = subject,
-                ReceivedUtc = received,
+                ReceivedUtc = received.DateTime, // Convert DateTimeOffset to DateTime
                 ReceivedLocal = FormatLocal(received),
                 Unread = !s.Flags.HasValue || !s.Flags.Value.HasFlag(MessageFlags.Seen),
                 HasAttachments = s.Attachments?.Any() == true,
@@ -118,7 +119,7 @@ public class ImapEmailReader
             FromName = from?.Name ?? string.Empty,
             FromEmail = from?.Address ?? string.Empty,
             Subject = message.Subject ?? "(No subject)",
-            ReceivedUtc = message.Date,
+            ReceivedUtc = message.Date.DateTime, // Convert DateTimeOffset to DateTime
             ReceivedLocal = FormatLocal(message.Date),
             Unread = false, // Flags aren't on MimeMessage; keep false here
             HasAttachments = message.Attachments.Any(),
