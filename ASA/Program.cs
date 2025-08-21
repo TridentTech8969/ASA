@@ -94,7 +94,7 @@ app.MapHub<EmailHub>("/hubs/email");
 // Map routes
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Emails}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
 
